@@ -38,10 +38,11 @@ def go_to(page_name):
 # --- PANTALLAS ---
 
 def screen_login():
-    # Nota para los testers que pediste
+    # Nota para los testers
     st.info("💡 **NOTA PARA PRUEBAS:**\nPara ingresar, usa el DNI: **12345678** y Contraseña: **password123**. Si no, regístrate abajo para crear un nuevo usuario.")
     
-    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/EsSalud_logo.svg/2560px-EsSalud_logo.svg.png", width=200)
+    # Imagen local
+    st.image("img/logo.png", width=200)
     st.title("Bienvenido(a)")
     
     with st.form("login_form"):
@@ -199,10 +200,11 @@ else:
     
     # --- MENÚ LATERAL (Solo visible si está logueado) ---
     with st.sidebar:
-        st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/EsSalud_logo.svg/2560px-EsSalud_logo.svg.png", width=150)
+        # Imagen local en el sidebar
+        st.image("img/logo.png", width=150)
         st.markdown(f"**Hola, {current_user_info['nombre']}**")
         st.caption(f"Mi Centro:\n{current_user_info['centro']}")
-        st.caption("Vigencia Hasta: 31/12/2024")
+        st.caption("Vigencia Hasta: 31/12/2026")
         st.write("---")
         
         if st.button("🏠 Inicio", use_container_width=True): go_to('Inicio')
