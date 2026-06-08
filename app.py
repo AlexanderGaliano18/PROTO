@@ -1,10 +1,15 @@
 import streamlit as st
+import os
+
+# --- CONFIGURACIÓN DE RUTAS A PRUEBA DE ERRORES ---
+# Esto asegura que encuentre la imagen sin importar si estás en local o en Streamlit Cloud
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+LOGO_PATH = os.path.join(BASE_DIR, "img", "logo.jpg") # <-- Actualizado a .jpg
 
 # --- CONFIGURACIÓN DE PÁGINA ---
 st.set_page_config(page_title="EsSalud Mi Consulta (Maqueta)", page_icon="🏥", layout="centered")
 
 # --- BASE DE DATOS SIMULADA Y ESTADO DE SESIÓN ---
-# Aquí guardamos los usuarios registrados temporalmente mientras la app esté corriendo
 if 'db_users' not in st.session_state:
     st.session_state['db_users'] = {
         "12345678": {
@@ -38,11 +43,14 @@ def go_to(page_name):
 # --- PANTALLAS ---
 
 def screen_login():
-    # Nota para los testers
     st.info("💡 **NOTA PARA PRUEBAS:**\nPara ingresar, usa el DNI: **12345678** y Contraseña: **password123**. Si no, regístrate abajo para crear un nuevo usuario.")
     
-    # Imagen local
-    st.image("img/logo.png", width=200)
+    # Cargar imagen de forma segura
+    if os.path.exists(LOGO_PATH):
+        st.image(LOGO_PATH, width=200)
+    else:
+        st.warning("⚠️ Logo no encontrado. Verifica que la carpeta 'img' y el archivo 'logo.jpg' existan en GitHub.")
+        
     st.title("Bienvenido(a)")
     
     with st.form("login_form"):
@@ -52,7 +60,6 @@ def screen_login():
         
         submitted = st.form_submit_button("Ingresar", use_container_width=True)
         if submitted:
-            # Validación con la "Base de Datos"
             if dni in st.session_state['db_users'] and st.session_state['db_users'][dni]['password'] == password:
                 st.session_state['logged_in'] = True
                 st.session_state['current_user_dni'] = dni
@@ -81,7 +88,6 @@ def screen_registro():
     st.checkbox("Términos y Condiciones de Uso")
     st.checkbox("Autorización para el Tratamiento de Datos Personales")
     
-    # Lógica de registro
     if st.button("Registrarme", type="primary", use_container_width=True):
         if not num_doc or not pass1:
             st.warning("⚠️ El número de documento y la contraseña son obligatorios.")
@@ -90,7 +96,6 @@ def screen_registro():
         elif num_doc in st.session_state['db_users']:
             st.error("❌ Este documento ya está registrado.")
         else:
-            # Guardar el nuevo usuario en la BD simulada
             st.session_state['db_users'][num_doc] = {
                 "password": pass1,
                 "nombre": nombre_nuevo.upper() if nombre_nuevo else "USUARIO NUEVO",
@@ -148,7 +153,6 @@ def screen_perfil():
     c1, c2, c3 = st.columns([1,1,1])
     with c2:
         if st.button("Guardar Cambios", type="primary", use_container_width=True):
-            # Actualizar datos en la BD simulada
             st.session_state['db_users'][st.session_state['current_user_dni']]['celular'] = celular
             st.session_state['db_users'][st.session_state['current_user_dni']]['correo'] = correo
             st.session_state['db_users'][st.session_state['current_user_dni']]['direccion'] = direccion
@@ -195,13 +199,13 @@ if not st.session_state['logged_in']:
     else:
         screen_login()
 else:
-    # Obtener los datos del usuario logueado
     current_user_info = st.session_state['db_users'][st.session_state['current_user_dni']]
     
-    # --- MENÚ LATERAL (Solo visible si está logueado) ---
     with st.sidebar:
-        # Imagen local en el sidebar
-        st.image("img/logo.png", width=150)
+        # Cargar imagen de forma segura en el sidebar
+        if os.path.exists(LOGO_PATH):
+            st.image(LOGO_PATH, width=150)
+            
         st.markdown(f"**Hola, {current_user_info['nombre']}**")
         st.caption(f"Mi Centro:\n{current_user_info['centro']}")
         st.caption("Vigencia Hasta: 31/12/2026")
@@ -217,7 +221,6 @@ else:
             logout()
             st.rerun()
 
-    # --- CONTENIDO PRINCIPAL ---
     if st.session_state['current_page'] == 'Inicio':
         screen_inicio()
     elif st.session_state['current_page'] == 'Perfil':
